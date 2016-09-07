@@ -18,7 +18,9 @@ class Runner extends EventEmitter {
             this.runCallback(
                 this.options,
                 (event) => {
-                    this.riemann.send(this.riemann.Event(_.assign({}, this.options.attribute, event)));
+                    event = _.assign({}, this.options.attribute, event);
+                    console.log(event);
+                    this.riemann.send(this.riemann.Event(event));
                 },
                 (err) => {
                     if (err) {
