@@ -18,7 +18,7 @@ class Runner extends EventEmitter {
             this.runCallback(
                 this.options,
                 (event) => {
-                    event = _.assign({}, this.options.attribute, event);
+                    event = _.assign({}, { attributes: this.options.attribute }, event);
                     console.log(event);
                     this.riemann.send(this.riemann.Event(event));
                 },
@@ -38,7 +38,7 @@ class Runner extends EventEmitter {
         this.options           = options.parse(this.options).opt;
         this.options.attribute = _.chain(this.options.attribute)
             .map(a => a.split('=', 2))
-            .fromPairs()
+            .map(x => _.zipObject([ 'key', 'value' ], x))
             .value();
 
         this.timeoutInterval = this.options.interval * 1000;
