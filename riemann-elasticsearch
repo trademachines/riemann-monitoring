@@ -1,0 +1,65 @@
+#!/usr/bin/env node
+'use strict';
+
+const http  = require('http');
+const async = require('neo-async');
+const _     = require('lodash');
+const r     = new (require('./_runner'))({
+    'es-host': { default: 'localhost' },
+    'es-port': { default: '9200' },
+    'es-search-index': { default: '_all' }
+});
+
+const get = (uri, cb) => {
+    http.get(uri, response => {
+        let data = '';
+        response.on('data', chunk => data += chunk.toString());
+        response.on('end', () => {
+            try {
+                cb(null, JSON.parse(data));
+            } catch (e) {
+                cb(e);
+            }
+        });
+    }).on('error', cb);
+};
+
+r.run((opts, r, cb) => {
+    const host    = `${opts[ 'es-host' ]}:${opts[ 'es-port' ]}`;
+    const baseUrl = `http://${host}/`;
+
+    async.parallel([
+        (cb) => {
+            get(`${baseUrl}_cluster/health`, (err, json) => {
+                if (err) return cb(err);
+
+                _.each(_.omit(json, 'timed_out', 'status', 'cluster_name'), (v, k) => {
+                    r({ host: host, service: `elasticsearch.cluster.${k}`, metric: v });
+                });
+
+                cb();
+            });
+        },
+        (cb) => {
+            get(`${baseUrl}${opts[ 'es-search-index' ]}/_stats`, (err, json) => {
+                if (err) return cb(err);
+
+                _.each(_.get(json, 'indices'), (v, index) => {
+                    const info  = _.get(v, `total.search`, {
+                        query_time_in_millis: 0,
+                        query_total: 1,
+                        fetch_time_in_millis: 0,
+                        fetch_total: 1
+                    });
+                    const query = info.query_time_in_millis / (info.query_total || 1);
+                    const fetch = info.fetch_time_in_millis / (info.fetch_total || 1);
+
+                    r({ host: host, service: `elasticsearch.search.query.${index}`, metric: query });
+                    r({ host: host, service: `elasticsearch.search.fetch.${index}`, metric: fetch });
+                });
+
+                cb();
+            });
+        }
+    ], cb);
+});

@@ -1,0 +1,13 @@
+{
+  "name": "riemann-monitoring",
+  "description": "Collection of tools to push various metrics to riemann.",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.15.0",
+    "neo-async": "^2.0.0",
+    "options-parser": "^0.4.0",
+    "riemannjs": "^1.0.1"
+  },
+  "devDependencies": {},
+  "scripts": {}
+}
