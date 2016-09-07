@@ -11,13 +11,14 @@ class Runner extends EventEmitter {
             'host': { default: 'localhost ' },
             'port': { default: 5555, type: options.type.int() },
             'interval': { default: 30, type: options.type.int() },
-            'tcp': { flag: true }
+            'tcp': { flag: true },
+            'attribute': { multi: true }
         });
         this.tick    = () => {
             this.runCallback(
                 this.options,
                 (event) => {
-                    this.riemann.send(this.riemann.Event(event))
+                    this.riemann.send(this.riemann.Event(_.assign({}, this.options.attribute, event)));
                 },
                 (err) => {
                     if (err) {
@@ -31,8 +32,13 @@ class Runner extends EventEmitter {
     }
 
     run(cb) {
-        this.runCallback     = cb;
-        this.options         = options.parse(this.options).opt;
+        this.runCallback       = cb;
+        this.options           = options.parse(this.options).opt;
+        this.options.attribute = _.chain(this.options.attribute)
+            .map(a => a.split('=', 2))
+            .fromPairs()
+            .value();
+
         this.timeoutInterval = this.options.interval * 1000;
         this.riemann         = riemann.createClient({
             host: this.options.host,
