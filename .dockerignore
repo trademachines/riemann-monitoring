@@ -1,7 +1,3 @@
-.git/
-spec/
-.dockerignore
-.gitignore
-.travis.yml
+.*
 Dockerfile
-**/*.spec.js
+src/*.spec.js
