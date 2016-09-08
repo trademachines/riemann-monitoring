@@ -8,6 +8,12 @@
     "options-parser": "^0.4.0",
     "riemannjs": "^1.0.1"
   },
-  "devDependencies": {},
-  "scripts": {}
+  "devDependencies": {
+    "istanbul": "^0.4.5",
+    "jasmine": "^2.5.1",
+    "jasmine-spec-reporter": "^2.7.0"
+  },
+  "scripts": {
+    "test": "node_modules/.bin/istanbul cover node_modules/.bin/jasmine"
+  }
 }
