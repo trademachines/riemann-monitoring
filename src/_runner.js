@@ -1,12 +1,12 @@
 const options      = require('options-parser');
 const EventEmitter = require('events');
-const riemann      = require('riemannjs');
 const _            = require('lodash');
 
 class Runner extends EventEmitter {
-    constructor(opts) {
+    constructor(riemann, opts) {
         super();
 
+        this.riemann = riemann;
         this.options = _.assign({}, opts || {}, {
             'host': { default: 'localhost ' },
             'port': { default: 5555, type: options.type.int() },
@@ -18,7 +18,9 @@ class Runner extends EventEmitter {
             this.runCallback(
                 this.options,
                 (event) => {
-                    this.riemann.send(this.riemann.Event(_.assign({}, { attributes: this.options.attribute }, event)));
+                    this.riemannClient.send(this.riemannClient.Event(
+                        _.assign({}, { attributes: this.options.attribute }, event)
+                    ));
                 },
                 (err) => {
                     if (err) {
@@ -31,8 +33,7 @@ class Runner extends EventEmitter {
         }
     }
 
-    run(cb) {
-        this.runCallback       = cb;
+    _parseOptions() {
         this.options           = options.parse(this.options).opt;
         this.options.attribute = _.chain(this.options.attribute)
             .map(a => a.split('=', 2))
@@ -40,12 +41,16 @@ class Runner extends EventEmitter {
             .value();
 
         this.timeoutInterval = this.options.interval * 1000;
-        this.riemann         = riemann.createClient({
+        this.riemannClient   = this.riemann.createClient({
             host: this.options.host,
             port: this.options.port,
             transport: !!this.options.tcp ? 'tcp' : 'udp'
         });
+    }
 
+    run(cb) {
+        this.runCallback = cb;
+        this._parseOptions();
         setTimeout(this.tick, 0);
     }
 }
