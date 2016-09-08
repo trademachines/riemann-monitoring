@@ -4,3 +4,4 @@ spec/
 .gitignore
 .travis.yml
 Dockerfile
+**/*.spec.js
