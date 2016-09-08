@@ -1,1 +1,1 @@
-# Riemann monitoring [![Build Status](https://travis-ci.org/trademachines/riemann-monitoring.svg?branch=master)](https://travis-ci.org/trademachines/riemann-monitoring)
+# Riemann monitoring [![Build Status](https://travis-ci.org/trademachines/riemann-monitoring.svg?branch=master)](https://travis-ci.org/trademachines/riemann-monitoring) [![Coverage Status](https://coveralls.io/repos/github/trademachines/riemann-monitoring/badge.svg?branch=master)](https://coveralls.io/github/trademachines/riemann-monitoring?branch=master)
