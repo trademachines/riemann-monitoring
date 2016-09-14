@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const nginx = require('./src/nginx');
+const r  = require('./src/_runner');
+
+nginx(
+    new r(require('riemannjs'), nginx.options)
+);
