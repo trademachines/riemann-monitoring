@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const phpFpm = require('./src/php-fpm');
+const r  = require('./src/_runner');
+
+phpFpm(
+    new r(require('riemannjs'), phpFpm.options)
+);

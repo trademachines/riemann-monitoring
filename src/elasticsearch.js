@@ -1,30 +1,17 @@
-const http = require('http');
 const _     = require('lodash');
 const async = require('neo-async');
-let last  = {};
+const http  = require('./_http-stuff');
 
-module.exports = (runner) => {
-    const get = (uri, cb) => {
-        http.get(uri, response => {
-            let data = '';
-            response.on('data', chunk => data += chunk.toString());
-            response.on('end', () => {
-                try {
-                    cb(null, JSON.parse(data));
-                } catch (e) {
-                    cb(e);
-                }
-            });
-        }).on('error', cb);
-    };
+let last = {};
 
+module.exports         = (runner) => {
     runner.run((opts, r, done) => {
         const host    = `${opts[ 'es-host' ]}:${opts[ 'es-port' ]}`;
         const baseUrl = `http://${host}/`;
 
         async.parallel([
             (cb) => {
-                get(`${baseUrl}_cluster/health`, (err, json) => {
+                http.json(`${baseUrl}_cluster/health`, (err, json) => {
                     if (err) return cb(err);
 
                     _.each(_.omit(json, 'timed_out', 'status', 'cluster_name'), (v, k) => {
@@ -35,7 +22,7 @@ module.exports = (runner) => {
                 });
             },
             (cb) => async.each(opts[ 'es-search-index' ], (index, cb) => {
-                get(`${baseUrl}${index}/_stats`, (err, json) => {
+                http.json(`${baseUrl}${index}/_stats`, (err, json) => {
                     if (err) return cb(err);
 
                     const info = _.get(json, '_all.total.search', {
@@ -91,7 +78,7 @@ module.exports = (runner) => {
         ], done);
     });
 };
-module.exports.reset = () => {
+module.exports.reset   = () => {
     last = {};
 };
 module.exports.options = {
