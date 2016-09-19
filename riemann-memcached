@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const memcached = require('./src/memcached');
+const r  = require('./src/_runner');
+
+memcached(
+    new r(require('riemannjs'), memcached.options)
+);
