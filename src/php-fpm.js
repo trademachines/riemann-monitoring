@@ -1,5 +1,4 @@
 const _     = require('lodash');
-const async = require('neo-async');
 const http  = require('./_http-stuff');
 
 const fixValues      = [

@@ -1,5 +1,4 @@
 const _     = require('lodash');
-const async = require('neo-async');
 const net   = require('net');
 
 const omittedKeys = [ 'pid', 'uptime', 'time', 'version', 'libevent' ];
