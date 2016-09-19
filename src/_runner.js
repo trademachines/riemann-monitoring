@@ -1,11 +1,8 @@
-const options      = require('options-parser');
-const EventEmitter = require('events');
-const _            = require('lodash');
+const options = require('options-parser');
+const _       = require('lodash');
 
-class Runner extends EventEmitter {
+class Runner {
     constructor(riemann, opts) {
-        super();
-
         this.riemann = riemann;
         this.options = _.assign({}, opts || {}, {
             'host': { default: 'localhost ' },

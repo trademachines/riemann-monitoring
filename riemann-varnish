@@ -1,0 +1,8 @@
+#!/usr/bin/env node
+
+const varnish = require('./src/varnish');
+const r  = require('./src/_runner');
+
+varnish(
+    new r(require('riemannjs'), varnish.options)
+);
