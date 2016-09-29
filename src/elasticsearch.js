@@ -15,7 +15,7 @@ module.exports         = (runner) => {
                     if (err) return cb(err);
 
                     _.each(_.omit(json, 'timed_out', 'status', 'cluster_name'), (v, k) => {
-                        r({ host: host, service: `elasticsearch.cluster.${k}`, metric: v });
+                        r({ service: `elasticsearch.cluster.${k}`, metric: v });
                     });
 
                     cb();
@@ -24,6 +24,12 @@ module.exports         = (runner) => {
             (cb) => async.each(opts[ 'es-search-index' ], (index, cb) => {
                 http.json(`${baseUrl}${index}/_stats`, (err, json) => {
                     if (err) return cb(err);
+
+                    _.each([ 'docs', 'store' ], (t) => {
+                        _.each(_.get(json, `_all.primaries.${t}`, {}), (v, k) => {
+                            r({ service: `elasticsearch.${t}.${index}.${k}`, metric: v });
+                        });
+                    });
 
                     const info = _.get(json, '_all.total.search', {
                         query_time_in_millis: 0,
@@ -43,25 +49,21 @@ module.exports         = (runner) => {
                         const queryDiff = queryTimeDiff / (queryTotalDiff || 1);
                         const fetchDiff = fetchTimeDiff / (fetchTotalDiff || 1);
 
-                        r({ host: host, service: `elasticsearch.search.diff.query.${index}`, metric: queryDiff });
-                        r({ host: host, service: `elasticsearch.search.diff.fetch.${index}`, metric: fetchDiff });
+                        r({ service: `elasticsearch.search.diff.query.${index}`, metric: queryDiff });
+                        r({ service: `elasticsearch.search.diff.fetch.${index}`, metric: fetchDiff });
                         r({
-                            host: host,
                             service: `elasticsearch.search.diff.query_total.${index}`,
                             metric: queryTotalDiff
                         });
                         r({
-                            host: host,
                             service: `elasticsearch.search.diff.fetch_total.${index}`,
                             metric: fetchTotalDiff
                         });
                         r({
-                            host: host,
                             service: `elasticsearch.search.diff.query_time.${index}`,
                             metric: queryTimeDiff
                         });
                         r({
-                            host: host,
                             service: `elasticsearch.search.diff.fetch_time.${index}`,
                             metric: fetchTimeDiff
                         });
@@ -69,8 +71,8 @@ module.exports         = (runner) => {
 
                     last[ index ] = info;
 
-                    r({ host: host, service: `elasticsearch.search.query.${index}`, metric: info.query });
-                    r({ host: host, service: `elasticsearch.search.fetch.${index}`, metric: info.fetch });
+                    r({ service: `elasticsearch.search.query.${index}`, metric: info.query });
+                    r({ service: `elasticsearch.search.fetch.${index}`, metric: info.fetch });
 
                     cb();
                 });

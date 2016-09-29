@@ -40,14 +40,14 @@ describe('elasticsearch monitoring', () => {
 
             es({
                 run: run(() => {
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                    expect(report).toHaveBeenCalledWith({
                         service: 'elasticsearch.cluster.one',
                         metric: 1
-                    }));
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                    });
+                    expect(report).toHaveBeenCalledWith({
                         service: 'elasticsearch.cluster.two',
                         metric: 2
-                    }));
+                    });
                     done();
                 })
             });
@@ -69,7 +69,12 @@ describe('elasticsearch monitoring', () => {
             fetch_total: 2
         };
         const stats   = (index, data) => {
-            return nock(/.*/).get(`/${index}/_stats`).reply(200, { _all: { total: { search: data || {} } } });
+            const total = { search: data || {} };
+            const primaries = {
+                docs: { count: 26, deleted: 11 },
+                store: { size_in_bytes: 26, throttle_time_in_millis: 11 }
+            };
+            return nock(/.*/).get(`/${index}/_stats`).reply(200, { _all: { total: total, primaries: primaries } });
         };
 
         beforeEach(() => {
@@ -99,22 +104,31 @@ describe('elasticsearch monitoring', () => {
         it('write per given index', (done) => {
             es({
                 run: run(() => {
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
-                        service: 'elasticsearch.search.query.one',
-                        metric: 1
-                    }));
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
-                        service: 'elasticsearch.search.fetch.one',
-                        metric: 1
-                    }));
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
-                        service: 'elasticsearch.search.query.two',
-                        metric: 2
-                    }));
-                    expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
-                        service: 'elasticsearch.search.fetch.two',
-                        metric: 2
-                    }));
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.search.query.one', metric: 1 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.search.fetch.one', metric: 1 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.search.query.two', metric: 2 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.search.fetch.two', metric: 2 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.search.fetch.two', metric: 2 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.docs.one.count', metric: 26 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.docs.one.deleted', metric: 11 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.docs.two.count', metric: 26 });
+                    expect(report).toHaveBeenCalledWith({ service: 'elasticsearch.docs.two.deleted', metric: 11 });
+                    expect(report).toHaveBeenCalledWith({
+                        service: 'elasticsearch.store.one.size_in_bytes',
+                        metric: 26
+                    });
+                    expect(report).toHaveBeenCalledWith({
+                        service: 'elasticsearch.store.one.throttle_time_in_millis',
+                        metric: 11
+                    });
+                    expect(report).toHaveBeenCalledWith({
+                        service: 'elasticsearch.store.two.size_in_bytes',
+                        metric: 26
+                    });
+                    expect(report).toHaveBeenCalledWith({
+                        service: 'elasticsearch.store.two.throttle_time_in_millis',
+                        metric: 11
+                    });
 
                     done();
                 })
@@ -139,22 +153,22 @@ describe('elasticsearch monitoring', () => {
 
                     es({
                         run: run(() => {
-                            expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                            expect(report).toHaveBeenCalledWith({
                                 service: 'elasticsearch.search.diff.query.one',
                                 metric: 2
-                            }));
-                            expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                            });
+                            expect(report).toHaveBeenCalledWith({
                                 service: 'elasticsearch.search.diff.fetch.one',
                                 metric: 2
-                            }));
-                            expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                            });
+                            expect(report).toHaveBeenCalledWith({
                                 service: 'elasticsearch.search.diff.query.two',
                                 metric: 1
-                            }));
-                            expect(report).toHaveBeenCalledWith(jasmine.objectContaining({
+                            });
+                            expect(report).toHaveBeenCalledWith({
                                 service: 'elasticsearch.search.diff.fetch.two',
                                 metric: 1
-                            }));
+                            });
 
                             done();
                         })
