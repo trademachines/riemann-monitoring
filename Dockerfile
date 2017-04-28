@@ -1,4 +1,4 @@
-FROM mhart/alpine-node:6.7
+FROM node:7.9-alpine
 
 COPY . /usr/share/app
 WORKDIR /usr/share/app

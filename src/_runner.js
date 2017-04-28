@@ -12,21 +12,26 @@ class Runner {
             'attribute': { multi: true }
         });
         this.tick    = () => {
-            this.runCallback(
+            try {
+              this.runCallback(
                 this.options,
                 (event) => {
-                    this.riemannClient.send(this.riemannClient.Event(
-                        _.assign({}, { attributes: this.options.attribute }, event)
-                    ));
+                  this.riemannClient.send(this.riemannClient.Event(
+                    _.assign({}, { attributes: this.options.attribute }, event)
+                  ));
                 },
                 (err) => {
-                    if (err) {
-                        console.error(err);
-                    }
+                  if (err) {
+                    console.error(err);
+                  }
 
-                    setTimeout(this.tick, this.timeoutInterval);
+                  setTimeout(this.tick, this.timeoutInterval);
                 }
-            );
+              );
+            } catch (e) {
+              console.error(e);
+              setTimeout(this.tick, this.timeoutInterval);
+            }
         }
     }
 
