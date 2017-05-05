@@ -4,6 +4,7 @@
   "license": "MIT",
   "dependencies": {
     "lodash": "^4.17.4",
+    "longjohn": "^0.2.12",
     "neo-async": "^2.1.0",
     "options-parser": "^0.4.0",
     "riemannjs": "^1.0.1"

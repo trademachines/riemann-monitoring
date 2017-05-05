@@ -1,6 +1,10 @@
 const options = require('options-parser');
 const _       = require('lodash');
 
+if ('1' === process.env.LONG_STACK_TRACES) {
+  require('longjohn');
+}
+
 class Runner {
     constructor(riemann, opts) {
         this.riemann = riemann;
