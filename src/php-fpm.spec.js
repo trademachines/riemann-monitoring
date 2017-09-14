@@ -40,7 +40,7 @@ describe('php-fpm monitoring', () => {
     });
 
     it('query status', (done) => {
-        const status = nock('http://localhost').get('/status?json').reply(200, {});
+        const status = nock(/.*/).get('/status?json').reply(200, {});
 
         fpm({
             run: run(() => {
@@ -51,7 +51,7 @@ describe('php-fpm monitoring', () => {
     });
 
     it('write metrics', (done) => {
-        nock('http://localhost').get('/status?json').reply(200, statusResponse);
+        nock(/.*/).get('/status?json').reply(200, statusResponse);
 
         fpm({
             run: run(() => {
@@ -90,10 +90,10 @@ describe('php-fpm monitoring', () => {
     });
 
     it('write additional metrics on second call', (done) => {
-        nock('http://localhost').get('/status?json').reply(200, statusResponse);
+        nock(/.*/).get('/status?json').reply(200, statusResponse);
         fpm({
             run: run(() => {
-                nock('http://localhost').get('/status?json').reply(200, _.assign({}, statusResponse, {
+                nock(/.*/).get('/status?json').reply(200, _.assign({}, statusResponse, {
                     'start since': statusResponse[ 'start since' ] + 10,
                     'accepted conn': statusResponse[ 'accepted conn' ] + 20
                 }));

@@ -4,7 +4,7 @@
     "src/**/*[sS]pec.js"
   ],
   "helpers": [
-    "jasmine-reporter.js"
+    "jasmine-bootstrap.js"
   ],
   "stopSpecOnExpectationFailure": false,
   "random": false

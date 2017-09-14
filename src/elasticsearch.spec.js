@@ -4,6 +4,15 @@ const nock = require('nock');
 const _    = require('lodash');
 const es   = require('./elasticsearch');
 
+nock(/.*/)
+  .persist()
+  .get('/')
+  .reply(200, {name: 'test-server'});
+nock(/.*/)
+  .persist()
+  .get('/_nodes/test-server/stats')
+  .reply(200, {});
+
 describe('elasticsearch monitoring', () => {
   let report, options;
   const noop = () => {
@@ -104,7 +113,6 @@ describe('elasticsearch monitoring', () => {
 
     afterEach(() => {
       es.reset();
-      nock.cleanAll();
     });
 
     it('query per given index', (done) => {

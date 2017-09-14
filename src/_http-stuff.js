@@ -1,18 +1,9 @@
-const http = require('http');
+const request = require('request');
 
-const get = (uri, cb, iteratee) => {
-    http.get(uri, response => {
-        let data = '';
-        response.on('data', chunk => data += chunk.toString());
-        response.on('end', () => {
-            try {
-                cb(null, typeof iteratee === 'function' ? iteratee(data) : data);
-            } catch (e) {
-                cb(e);
-            }
-        });
-    }).on('error', cb);
+
+const wrap = (options, cb) => {
+  request(options, (err, response, body) => cb(err, body));
 };
 
-module.exports.text = get;
-module.exports.json = (uri, cb) => get(uri, cb, JSON.parse);
+module.exports.text = (uri, cb) => wrap(uri, cb);
+module.exports.json = (uri, cb) => wrap({url: uri, json: true}, cb);

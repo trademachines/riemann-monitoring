@@ -23,7 +23,7 @@ describe('nginx monitoring', () => {
     });
 
     it('query status', (done) => {
-        const status = nock('http://localhost').get('/nginx_status').reply(200, '');
+        const status = nock(/.*/).get('/nginx_status').reply(200, '');
 
         nginx({
             run: run(() => {
@@ -34,7 +34,7 @@ describe('nginx monitoring', () => {
     });
 
     it('dont report if not able to match', (done) => {
-        nock('http://localhost').get('/nginx_status').reply(200, 'msg');
+        nock(/.*/).get('/nginx_status').reply(200, 'msg');
 
         nginx({
             run: run((err) => {
@@ -51,7 +51,7 @@ server accepts handled requests
  4 4 8 
 Reading: 0 Writing: 1 Waiting: 3`;
 
-        nock('http://localhost').get('/nginx_status').reply(200, status);
+        nock(/.*/).get('/nginx_status').reply(200, status);
 
         nginx({
             run: run(() => {

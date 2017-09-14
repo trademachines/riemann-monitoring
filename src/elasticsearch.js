@@ -11,17 +11,17 @@ module.exports         = (runner) => {
 
     async.parallel([
       (cb) => {
-        http.json(`${baseUrl}_cluster/health`, (err, json) => {
-          if (err) {
-            return cb(err);
+        async.waterfall([
+          (cb) => http.json(`${baseUrl}_cluster/health`, cb),
+          (health, cb) => {
+
+            _.each(_.omit(health, 'timed_out', 'status', 'cluster_name'), (v, k) => {
+              r({service: `elasticsearch.cluster.${k}`, metric: v});
+            });
+
+            cb();
           }
-
-          _.each(_.omit(json, 'timed_out', 'status', 'cluster_name'), (v, k) => {
-            r({service: `elasticsearch.cluster.${k}`, metric: v});
-          });
-
-          cb();
-        });
+        ], cb);
       },
       (cb) => async.each(opts['es-search-index'], (index, cb) => {
         http.json(`${baseUrl}${index}/_stats`, (err, json) => {
@@ -112,7 +112,25 @@ module.exports         = (runner) => {
 
           cb();
         });
-      }, cb)
+      }, cb),
+      (cb) => {
+        async.waterfall([
+          (cb) => http.json(`${baseUrl}`, cb),
+          (server, cb) => http.json(`${baseUrl}_nodes/${server.name}/stats`, cb),
+          (node, cb) => {
+            let memory = _.chain(node)
+              .get('nodes')
+              .values().head()
+              .get('jvm.mem')
+              .defaults({heap_used_percent: 0})
+              .value();
+
+            r({service: `elasticsearch.jvm.memory.heap_used`, metric: memory.heap_used_percent});
+
+            cb();
+          }
+        ], cb)
+      }
     ], done);
   });
 };
